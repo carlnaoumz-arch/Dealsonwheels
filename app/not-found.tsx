@@ -1,0 +1,2 @@
+import {Header,Footer} from './site-shell';
+export default function NotFound(){return <main><Header/><section className="section" style={{paddingTop:180,minHeight:'80vh'}}><p className="eyebrow">VEHICLE NOT FOUND</p><h1 style={{fontSize:'4rem'}}>A different route.</h1><p>This vehicle page is unavailable. Explore the collection or speak to our team.</p><a className="button" href="/#collection">View collection ↗</a></section><Footer/></main>}
