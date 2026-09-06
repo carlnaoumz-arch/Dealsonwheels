@@ -11,3 +11,31 @@
 .car-scene{inset:auto 0 5%;height:auto;aspect-ratio:1672/941}.car-scene img{object-fit:fill;object-position:center}.reveal-base{mask-image:radial-gradient(ellipse var(--beam,0%) var(--beam,0%) at 65% 65%,#000 45%,transparent 100%);filter:brightness(calc(.25 + var(--body)*.75))}.headlight-layer{clip-path:none;mask-image:radial-gradient(ellipse 4.1% 2.5% at 62.5% 65.5%,#000 35%,transparent 100%),radial-gradient(ellipse 2.8% 2.5% at 83% 64.5%,#000 35%,transparent 100%)}.home-page>.concierge{opacity:0;animation:show-nav .6s 2s forwards}.home-page>.concierge:focus{opacity:1}.hero-actions{visibility:hidden}.intro-ready .hero-actions{visibility:visible}
 @media(max-width:700px){.car-scene{inset:auto -20% 16% -35%;height:auto}.headlight-layer{mask-image:radial-gradient(ellipse 4.1% 2.5% at 62.5% 65.5%,#000 35%,transparent 100%),radial-gradient(ellipse 2.8% 2.5% at 83% 64.5%,#000 35%,transparent 100%)}}
 @media(prefers-reduced-motion:reduce){.car-scene{inset:140px 0 auto;height:auto}.reveal-base{mask-image:none}.home-page>.concierge{opacity:1}.hero-actions{visibility:visible}}
+/* Optional, photo-based vehicle tours. */
+.gallery-mode-list{width:100%;height:auto!important;justify-content:flex-start!important;gap:26px!important;border-bottom:1px solid #39372f;padding:0 0 12px!important;margin-bottom:14px}
+.gallery-mode-list [data-slot=tabs-trigger]{flex:0 1 auto;min-height:40px;padding:8px 0;border-radius:0;font-size:14px;gap:10px;color:#929292;background:none}
+.gallery-mode-list [data-slot=tabs-trigger][data-active]{color:#e4d1ae}
+.gallery-mode-list [data-slot=tabs-trigger]:after{background:#c8b591;bottom:-13px!important}
+.photo-stage{position:relative;height:650px;background:#101111;overflow:hidden}
+.photo-stage>img{width:100%;height:100%;object-fit:contain}
+.tour-stage{cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.tour-stage.is-dragging{cursor:grabbing}
+.tour-stage:focus-visible{outline:2px solid #c8b591;outline-offset:-3px}
+.tour-stage>img{pointer-events:none;-webkit-user-drag:none}
+.tour-badge{position:absolute;top:20px;left:20px;display:flex;align-items:center;gap:9px;background:#080909d9;border:1px solid #736448;padding:11px 14px;font-size:11px;letter-spacing:.12em;pointer-events:none;color:#dfceb0}
+.drag-hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:12px;white-space:nowrap;background:#080909da;border:1px solid #635a48;padding:12px 17px;pointer-events:none;font-size:11px;letter-spacing:.12em;color:#e4d1ae}
+.photo-status{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;background:#080909bd;font-size:14px;color:#d2c4ab;pointer-events:none}
+.photo-status button{pointer-events:auto;border:1px solid #897553;background:#141414;padding:10px 18px;color:#eee}
+.photo-loader{animation:photo-spin 1s linear infinite}@keyframes photo-spin{to{transform:rotate(360deg)}}
+.tour-controls{background:#131414;padding:24px;border-top:1px solid #2f2b24}
+.tour-controls>p:first-child{display:flex;gap:12px;align-items:center;line-height:1.6;font-size:14px;color:#d4c7b0;margin-bottom:24px}
+.tour-controls>p:first-child svg{flex-shrink:0}
+.tour-scrubber>span{display:block;font-size:11px;letter-spacing:.13em;color:#999;margin-bottom:20px}
+.tour-scrubber [data-slot=slider]{padding:8px 2px}
+.tour-scrubber [data-slot=slider-track]{background:#3b3934!important}
+.tour-scrubber [data-slot=slider-range]{background:#c8b591!important}
+.tour-scrubber [data-slot=slider-thumb]{background:#dfceac!important;border:1px solid #dfceac!important;width:17px;height:17px}
+.tour-disclosure{font-size:12px;line-height:1.6;color:#999;margin:22px 0 0}
+@media(max-width:1000px){.photo-stage{height:540px}}
+@media(max-width:700px){.photo-stage{height:510px}.gallery-mode-list{gap:24px!important}.gallery-mode-list [data-slot=tabs-trigger]{font-size:13px}.tour-controls{padding:20px}.tour-badge{top:14px;left:14px}.drag-hint{bottom:15px}}
+@media(prefers-reduced-motion:reduce){.photo-loader{animation:none}}
