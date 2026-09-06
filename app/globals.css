@@ -125,3 +125,10 @@ nav .nav-find-car{color:#cfbd9d}
 .collection-search-cta .button{font-size:12px;white-space:nowrap}
 @media(max-width:700px){header nav{gap:15px;flex-wrap:wrap;justify-content:flex-end}header nav .nav-find-car{display:flex;font-size:11px}.collection-search-cta{padding:22px;gap:20px;align-items:flex-start;flex-direction:column}.collection-search-cta .button{width:100%;justify-content:space-between}}
 @media(max-width:430px){header nav{max-width:114px;gap:8px}header nav a:last-child{font-size:10px;gap:5px;padding-bottom:4px}}
+
+.hero-film{position:absolute;inset:0;pointer-events:none}
+.hero-film-poster,.hero-film-video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center bottom}
+.hero-film-poster{opacity:var(--body)}
+.hero-film-video{opacity:0;filter:brightness(var(--film-exposure,.28))}.hero-film-video.is-ready{opacity:1}
+@media(max-width:700px){.hero-film{inset:30% -4% 13% -4%}.hero-film-poster,.hero-film-video{object-position:center}}
+@media(prefers-reduced-motion:reduce){.hero-film-video{display:none}.hero-film-poster{opacity:1}}

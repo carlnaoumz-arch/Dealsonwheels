@@ -2,6 +2,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {ArrowDown,ArrowUpRight} from 'lucide-react';
 import {clamp,heroMotion} from '../lib/hero-motion';
+import HeroFilm from './hero-film';
 const story=['Based in Beirut.','A destination for luxury and high-performance automobiles.','Turning automotive dreams into reality.','Welcome to the Special League.'];
 export default function Hero(){
   const ref=useRef<HTMLElement>(null);
@@ -22,6 +23,8 @@ export default function Hero(){
       const a=active||media.matches?1:0;
       const s=el.style;
       s.setProperty('--body',String(m.body*a));
+      s.setProperty('--film-exposure',String(.28+.72*clamp(current/.14)));
+      el.dispatchEvent(new CustomEvent('hero-film-progress',{detail:clamp(current/.82)*a}));
       s.setProperty('--beam',`${m.body*150}%`);
       s.setProperty('--headlights',String(m.headlights*a));
       s.setProperty('--sweep',`${m.sweep}%`);
@@ -46,11 +49,11 @@ export default function Hero(){
     return()=>{clearTimeout(timer);cancelAnimationFrame(frame);removeEventListener('scroll',schedule);removeEventListener('resize',schedule);media.removeEventListener('change',change);document.documentElement.classList.remove('intro-ready')};
   },[]);
   return <section ref={ref} className={`cinema brand-cinema ${reduced?'reduced':''}`} aria-label="Discover Deals On Wheels"><div className="stage">
-    <div className="distant-spotlight" aria-hidden="true"><svg className="spotlight-beam" viewBox="0 0 180 260" fill="none"><defs><linearGradient id="studio-beam" x1="90" y1="0" x2="90" y2="260" gradientUnits="userSpaceOnUse"><stop stopColor="#eeefec" stopOpacity=".34"/><stop offset=".28" stopColor="#d9dcda" stopOpacity=".12"/><stop offset=".72" stopColor="#d9dcda" stopOpacity=".035"/><stop offset="1" stopColor="#d9dcda" stopOpacity="0"/></linearGradient><filter id="studio-softness" x="-30%" y="-15%" width="160%" height="140%"><feGaussianBlur stdDeviation="7"/></filter></defs><path d="M87 2H93L169 252H11Z" fill="url(#studio-beam)" filter="url(#studio-softness)"/></svg><span className="spotlight-source"/></div>
-    <div className="car-scene"><img className="reveal-base" src="/images/aventador-studio.webp" alt="Blue Lamborghini Aventador S Roadster in a dark studio — edited model concept imagery" fetchPriority="high"/><img className="headlight-layer" src="/images/aventador-studio.webp" alt="" aria-hidden="true"/><img className="headlight-bloom" src="/images/aventador-studio.webp" alt="" aria-hidden="true"/><img className="light-pass" src="/images/aventador-studio.webp" alt="" aria-hidden="true"/></div>
+
+    <HeroFilm/>
     <div className="hero-narrative" aria-hidden="true">{story.map((line,i)=><div className={`story-mask story-${i}`} key={line}><p>{line}</p></div>)}</div>
     <p className="sr-only">{story.join(' ')}</p>
     <div className="hero-signature"><p className="eyebrow">WELCOME TO THE SPECIAL LEAGUE</p><h1>Deals On Wheels.</h1><div className="hero-actions"><a className="text-link" href="#collection">Explore collection <ArrowUpRight size={16}/></a></div></div>
-    <div className={`scroll-cue ${ready?'visible':''}`}><span>{reduced?'DISCOVER THE COLLECTION':'SCROLL TO DISCOVER'}</span><ArrowDown size={21}/></div><a className={`skip ${ready?'visible':''}`} href="#collection">Skip to collection ↘</a><div className="model-note">Edited model imagery · Actual vehicle shown below</div><div className="hero-outro"/><div className="timeline"/>
+    <div className={`scroll-cue ${ready?'visible':''}`}><span>{reduced?'DISCOVER THE COLLECTION':'SCROLL TO DISCOVER'}</span><ArrowDown size={21}/></div><a className={`skip ${ready?'visible':''}`} href="#collection">Skip to collection ↘</a><div className="model-note">Higgsfield visualization · Based on the actual vehicle</div><div className="hero-outro"/><div className="timeline"/>
   </div></section>;
 }
