@@ -65,3 +65,14 @@
 
 .brand-cinema .hero-signature .hero-actions{visibility:var(--signature-links,hidden)}
 @media(prefers-reduced-motion:reduce){.brand-cinema .hero-signature .hero-actions{visibility:visible}}
+
+/* A small practical light establishes the distant studio before the car is visible. */
+.distant-studio-lamp{position:absolute;left:21%;top:40%;width:22px;height:8px;z-index:1;pointer-events:none;opacity:calc(.86 - var(--body)*.38)}
+.lamp-cable{position:absolute;width:1px;height:36px;bottom:7px;left:50%;background:linear-gradient(transparent,#292723)}
+.lamp-shade{position:absolute;inset:0;background:linear-gradient(#34332f,#111210);border-radius:60% 60% 20% 20%;border-bottom:1px solid #8c8879}
+.lamp-source{position:absolute;left:4px;right:4px;bottom:-1px;height:2px;border-radius:50%;background:#e1dccb;box-shadow:0 1px 4px 1px #ded4b83d,0 4px 14px 4px #d8ccaa12}
+.lamp-spill{position:absolute;left:50%;top:5px;width:125px;height:170px;transform:translateX(-50%);background:radial-gradient(ellipse at 50% 0%,#c6bc9e0e,transparent 68%);mask-image:linear-gradient(transparent,#000 8%,#000 70%,transparent);filter:blur(6px)}
+.brand-cinema .headlight-layer,.brand-cinema .headlight-bloom{mask-image:url('/images/headlight-mask.svg');mask-size:100% 100%;mask-repeat:no-repeat;clip-path:none}
+.brand-cinema .headlight-layer{filter:saturate(.65) brightness(1.28) contrast(1.06);opacity:var(--headlights)}
+.brand-cinema .headlight-bloom{filter:saturate(.35) brightness(1.4) blur(2px);opacity:calc(var(--headlights)*.16);mix-blend-mode:screen;pointer-events:none}
+@media(max-width:700px){.distant-studio-lamp{left:16%;top:42%;transform:scale(.8)}}
