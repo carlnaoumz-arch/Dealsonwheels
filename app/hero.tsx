@@ -1,7 +1,55 @@
 'use client';
 import {useEffect,useRef,useState} from 'react';
 import {ArrowDown,ArrowUpRight} from 'lucide-react';
-const clamp=(n:number)=>Math.max(0,Math.min(1,n));
-export default function Hero(){const ref=useRef<HTMLElement>(null);const [ready,setReady]=useState(false);const [reduced,setReduced]=useState(false);
-useEffect(()=>{const media=matchMedia('(prefers-reduced-motion: reduce)');let frame=0;let active=false;const el=ref.current!;const apply=()=>{frame=0;const p=clamp(-el.getBoundingClientRect().top/(el.offsetHeight-innerHeight));const r=media.matches;const s=el.style;const a=r?1:active?1:0;const body=r?1:clamp((p-.07)/.31);const exit=r?0:clamp((p-.89)/.1);s.setProperty('--body',String(body*a));s.setProperty('--beam',`${body*120}%`);s.setProperty('--headlights',String(clamp(p/.065)*a));s.setProperty('--sweep',`${110-clamp((p-.1)/.32)*145}%`);s.setProperty('--title',String((r?1:clamp((p-.12)/.13)*(1-clamp((p-.4)/.09)))*a));s.setProperty('--camera',String(r?1:1.07-p*.12+exit*.38));s.setProperty('--shift',`${r?0:Math.max(0,p-.4)*-7}%`);s.setProperty('--exit',String(exit));s.setProperty('--progress',`${p*100}%`);for(let i=0;i<4;i++)s.setProperty(`--spec${i}`,String((r?1:clamp((p-(.45+i*.095))/.055))*a));};const scroll=()=>{if(!frame)frame=requestAnimationFrame(apply)};const change=()=>{setReduced(media.matches);scroll()};change();const t=setTimeout(()=>{active=true;setReady(true);document.documentElement.classList.add('intro-ready');apply()},media.matches?0:2000);addEventListener('scroll',scroll,{passive:true});addEventListener('resize',scroll);media.addEventListener('change',change);return()=>{clearTimeout(t);cancelAnimationFrame(frame);removeEventListener('scroll',scroll);removeEventListener('resize',scroll);media.removeEventListener('change',change);document.documentElement.classList.remove('intro-ready')}},[]);
-return <section ref={ref} className={`cinema ${reduced?'reduced':''}`} aria-label="Scroll to reveal the Lamborghini Aventador S Roadster"><div className="stage"><div className="car-scene"><img className="reveal-base" src="/images/aventador-studio.webp" alt="Blue Lamborghini Aventador S Roadster in a dark studio — edited model concept imagery" fetchPriority="high"/><img className="headlight-layer" src="/images/aventador-studio.webp" alt="" aria-hidden="true"/><img className="light-pass" src="/images/aventador-studio.webp" alt="" aria-hidden="true"/></div><div className="hero-title"><p className="eyebrow">BEIRUT, LEBANON · EST. 2021</p><h1>Beyond <em>ordinary.</em></h1><p>AUTOMOTIVE EXTRAVAGANCE</p><div className="hero-actions"><a className="text-link" href="#collection">Explore collection <ArrowUpRight size={16}/></a><a className="text-link" href="#contact">Contact sales <ArrowUpRight size={16}/></a></div></div><div className="performance"><p className="eyebrow">AVENTADOR S ROADSTER / THE NUMBERS</p><div className="spec-line">{[['730','HP','POWER'],['6.5','L V12','ENGINE'],['350','KM/H','TOP SPEED'],['18,000','KM','DEALER-LISTED MILEAGE']].map((v,i)=><div className={`hero-spec spec-${i}`} key={v[2]}><strong>{v[0]}<small>{v[1]}</small></strong><span>{v[2]}</span></div>)}</div><p className="spec-note">Specifications of the dealer-listed 2018 vehicle. Confirm details with sales.</p></div><div className={`scroll-cue ${ready?'visible':''}`}><span>{reduced?'DISCOVER THE COLLECTION':'SCROLL TO REVEAL'}</span><ArrowDown size={21}/></div><a className={`skip ${ready?'visible':''}`} href="#collection">Skip to collection ↘</a><div className="model-note">Edited model imagery · Actual vehicle shown below</div><div className="hero-outro"/><div className="timeline"/></div></section>}
+import {clamp,heroMotion} from '../lib/hero-motion';
+const story=['Based in Beirut.','A destination for luxury and high-performance automobiles.','Turning automotive dreams into reality.','Welcome to the Special League.'];
+export default function Hero(){
+  const ref=useRef<HTMLElement>(null);
+  const [ready,setReady]=useState(false);
+  const [reduced,setReduced]=useState(false);
+  useEffect(()=>{
+    const media=matchMedia('(prefers-reduced-motion: reduce)');
+    const el=ref.current!;
+    let frame=0,active=false,current=0,last=0;
+    const apply=(time:number)=>{
+      frame=0;
+      const target=clamp(-el.getBoundingClientRect().top/Math.max(1,el.offsetHeight-innerHeight));
+      const dt=last?Math.min(64,time-last):16;
+      last=time;
+      current=media.matches?target:current+(target-current)*(1-Math.exp(-dt/85));
+      if(Math.abs(target-current)<.0001)current=target;
+      const m=heroMotion(current,media.matches);
+      const a=active||media.matches?1:0;
+      const s=el.style;
+      s.setProperty('--body',String(m.body*a));
+      s.setProperty('--beam',`${m.body*150}%`);
+      s.setProperty('--headlights',String(m.headlights*a));
+      s.setProperty('--sweep',`${m.sweep}%`);
+      s.setProperty('--reflection',String(m.reflection*a));
+      s.setProperty('--camera',String(m.camera));
+      s.setProperty('--shift',`${m.shift}%`);
+      s.setProperty('--depth',`${m.depth}%`);
+      s.setProperty('--title',String(m.title*a));
+      s.setProperty('--signature-links',m.title*a>.05?'visible':'hidden');
+      s.setProperty('--exit',String(m.exit));
+      s.setProperty('--progress',`${current*100}%`);
+      m.stories.forEach((value,i)=>s.setProperty(`--story${i}`,String(value*a)));
+      if(current!==target)frame=requestAnimationFrame(apply);
+    };
+    const schedule=()=>{if(!frame){last=0;frame=requestAnimationFrame(apply)}};
+    const change=()=>{setReduced(media.matches);schedule()};
+    change();
+    const timer=setTimeout(()=>{active=true;setReady(true);document.documentElement.classList.add('intro-ready');schedule()},media.matches?0:1000);
+    addEventListener('scroll',schedule,{passive:true});
+    addEventListener('resize',schedule);
+    media.addEventListener('change',change);
+    return()=>{clearTimeout(timer);cancelAnimationFrame(frame);removeEventListener('scroll',schedule);removeEventListener('resize',schedule);media.removeEventListener('change',change);document.documentElement.classList.remove('intro-ready')};
+  },[]);
+  return <section ref={ref} className={`cinema brand-cinema ${reduced?'reduced':''}`} aria-label="Discover Deals On Wheels"><div className="stage">
+    <div className="car-scene"><img className="reveal-base" src="/images/aventador-studio.webp" alt="Blue Lamborghini Aventador S Roadster in a dark studio — edited model concept imagery" fetchPriority="high"/><img className="headlight-layer" src="/images/aventador-studio.webp" alt="" aria-hidden="true"/><img className="light-pass" src="/images/aventador-studio.webp" alt="" aria-hidden="true"/></div>
+    <div className="hero-narrative" aria-hidden="true">{story.map((line,i)=><div className={`story-mask story-${i}`} key={line}><p>{line}</p></div>)}</div>
+    <p className="sr-only">{story.join(' ')}</p>
+    <div className="hero-signature"><p className="eyebrow">WELCOME TO THE SPECIAL LEAGUE</p><h1>Deals On Wheels.</h1><div className="hero-actions"><a className="text-link" href="#collection">Explore collection <ArrowUpRight size={16}/></a></div></div>
+    <div className={`scroll-cue ${ready?'visible':''}`}><span>{reduced?'DISCOVER THE COLLECTION':'SCROLL TO DISCOVER'}</span><ArrowDown size={21}/></div><a className={`skip ${ready?'visible':''}`} href="#collection">Skip to collection ↘</a><div className="model-note">Edited model imagery · Actual vehicle shown below</div><div className="hero-outro"/><div className="timeline"/>
+  </div></section>;
+}
