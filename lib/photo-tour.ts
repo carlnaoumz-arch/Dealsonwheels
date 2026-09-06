@@ -27,3 +27,12 @@ export function uniqueVehiclePhotos(urls: string[]): string[] {
     return true;
   });
 }
+
+/** Fractional cursor position blends two genuine adjacent views without inventing angles. */
+export function tourBlend(position:number,count:number,reduced=false){
+  if(count<2)return {from:0,to:0,mix:0};
+  const wrapped=wrapPhotoIndex(position,count);
+  if(reduced){const index=wrapPhotoIndex(Math.round(wrapped),count);return {from:index,to:index,mix:0}}
+  const from=Math.floor(wrapped),fraction=wrapped-from;
+  return {from,to:wrapPhotoIndex(from+1,count),mix:fraction*fraction*(3-2*fraction)};
+}

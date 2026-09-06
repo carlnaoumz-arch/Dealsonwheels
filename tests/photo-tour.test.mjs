@@ -37,3 +37,32 @@ test('all 77 vehicles retain multiple genuine photos and a valid selectable sequ
     }
   }
 });
+
+test('fractional exterior scrubbing blends continuously, including reverse and loop seams',async()=>{
+ const {tourBlend}=await import('../lib/photo-tour.ts');
+ assert.deepEqual(tourBlend(0,4),{from:0,to:1,mix:0});
+ assert.deepEqual(tourBlend(.5,4),{from:0,to:1,mix:.5});
+ assert.deepEqual(tourBlend(-.5,4),{from:3,to:0,mix:.5});
+ assert.ok(tourBlend(.9999,4).mix>.999);
+ assert.equal(tourBlend(1,4).from,1);
+ assert.equal(tourBlend(3.9999,4).to,0);
+ assert.equal(tourBlend(4,4).from,0);
+ assert.deepEqual(tourBlend(.7,4,true),{from:1,to:1,mix:0});
+ for(let i=-200;i<200;i++){
+  const blend=tourBlend(i/100,4);
+  assert.ok(blend.mix>=0&&blend.mix<=1);
+  assert.ok(Number.isInteger(blend.from)&&Number.isInteger(blend.to));
+ }
+});
+
+test('every vehicle has a curated exterior sequence drawn only from its original photographs',()=>{
+ const tours=JSON.parse(readFileSync(new URL('../lib/exterior-tours.json',import.meta.url)));
+ const cars=JSON.parse(readFileSync(new URL('../lib/inventory.json',import.meta.url)));
+ assert.equal(Object.keys(tours).length,cars.length);
+ for(const car of cars){
+  const originals=new Set([car.image_url,...car.gallery_images.map(photo=>photo.image_url)]);
+  assert.ok(tours[car.id].length>=2,car.id);
+  assert.equal(new Set(tours[car.id]).size,tours[car.id].length,car.id);
+  assert.ok(tours[car.id].every(photo=>originals.has(photo)),car.id);
+ }
+});
