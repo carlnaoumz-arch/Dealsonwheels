@@ -1,0 +1,1 @@
+export const branches=[{id:'dbayeh',name:'Dbayeh',address:'Dbayeh Highway, Lebanon',directions:'https://www.google.com/maps/search/?api=1&query=Deals+On+Wheels+Dbayeh+Lebanon'},{id:'beirut',name:'Beirut',address:'Beirut, Lebanon',directions:'https://wa.me/96181664448?text=Hello%20Deals%20On%20Wheels%2C%20please%20send%20me%20directions%20to%20your%20Beirut%20branch.'}];
