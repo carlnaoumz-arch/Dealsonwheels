@@ -1,5 +1,7 @@
 import data from './inventory.json';
-export const cars=data;
+import {bodyStyle} from './car-matches';
+import {modelLabel,conditionLabel,cleanText} from './vehicle-format';
+export const cars=data.map(car=>({...car,body_style:bodyStyle(car),exterior_color:cleanText(car.exterior_color)||null,interior_color:cleanText(car.interior_color)||null,make:car.make==='Mercedes'?'Mercedes-Benz':car.make,model:modelLabel(car.model),vehicle_condition:conditionLabel(car.vehicle_condition)}));
 export type Car=typeof cars[number];
 export const featured=cars.find(c=>c.vin==='ZHWEV4ZD7JLA07350')!;
 export const price=(c:Car)=>c.price?`USD ${c.price.toLocaleString('en-US')}`:'Price on request';

@@ -20,6 +20,7 @@ export default function Hero(){
       current=media.matches?target:current+(target-current)*(1-Math.exp(-dt/85));
       if(Math.abs(target-current)<.0001)current=target;
       const m=heroMotion(current,media.matches);
+      if(innerWidth<=700&&!media.matches)m.stories[0]=Math.max(m.stories[0],(active?1:0)*(1-clamp(current/.13)));
       const a=active||media.matches?1:0;
       const s=el.style;
       s.setProperty('--body',String(m.body*a));
@@ -42,7 +43,7 @@ export default function Hero(){
     const schedule=()=>{if(!frame){last=0;frame=requestAnimationFrame(apply)}};
     const change=()=>{setReduced(media.matches);schedule()};
     change();
-    const timer=setTimeout(()=>{active=true;setReady(true);document.documentElement.classList.add('intro-ready');schedule()},media.matches?0:1000);
+    const timer=setTimeout(()=>{active=true;setReady(true);document.documentElement.classList.add('intro-ready');schedule()},media.matches?0:650);
     addEventListener('scroll',schedule,{passive:true});
     addEventListener('resize',schedule);
     media.addEventListener('change',change);
@@ -54,6 +55,6 @@ export default function Hero(){
     <div className="hero-narrative" aria-hidden="true">{story.map((line,i)=><div className={`story-mask story-${i}`} key={line}><p>{line}</p></div>)}</div>
     <p className="sr-only">{story.join(' ')}</p>
     <div className="hero-signature"><p className="eyebrow">WELCOME TO THE SPECIAL LEAGUE</p><h1>Deals On Wheels.</h1><div className="hero-actions"><a className="text-link" href="#collection">Explore collection <ArrowUpRight size={16}/></a></div></div>
-    <div className={`scroll-cue ${ready?'visible':''}`}><span>{reduced?'DISCOVER THE COLLECTION':'SCROLL TO DISCOVER'}</span><ArrowDown size={21}/></div><a className={`skip ${ready?'visible':''}`} href="#collection">Skip to collection ↘</a><div className="model-note">Higgsfield visualization · Based on the actual vehicle</div><div className="hero-outro"/><div className="timeline"/>
+    <div className={`scroll-cue ${ready?'visible':''}`}><span>{reduced?'DISCOVER THE COLLECTION':'SCROLL TO DISCOVER'}</span><ArrowDown size={21}/></div><a className="skip visible" href="#collection">Skip to collection ↘</a><div className="model-note">Higgsfield visualization · Based on the actual vehicle</div><div className="hero-outro"/><div className="timeline"/>
   </div></section>;
 }

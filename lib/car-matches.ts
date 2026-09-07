@@ -1,10 +1,11 @@
 import type {CarPreferences} from './private-search';
-export type SearchCar={id:string;make:string;model:string;year:number|null;price:number|null;status:string;image_url:string};
-const normalize=(value:string)=>value.normalize('NFKC').toLowerCase().replace(/[^a-z0-9]/g,'');
+export type SearchCar={id:string;make:string;model:string;year:number|null;price:number|null;status:string;image_url:string;body_style?:string|null};
+const normalize=(value:string)=>value.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
 const brandKey=(value:string)=>{const key=normalize(value);return ['mercedesbenz','mercedes','mercedesamg'].includes(key)?'mercedes':key};
 // Recognize unambiguous model families; unspecified body variants stay unknown.
 export function bodyStyle(car:SearchCar):string|null{
- const model=car.model.normalize('NFKC').toLowerCase();
+ if(car.body_style)return car.body_style;
+ const model=car.model.normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
  if(/\b(urus|cayenne|defender|escalade|yukon|tahoe|patrol|vogue|x6m|gls)\b|\bg(63|700|800)\b/.test(model)||(car.make==='Land Rover'&&/^sport\b/.test(model)))return 'SUV';
  if(/\b(roadster|spider|cabriolet|convertible|targa)\b/.test(model))return 'Convertible';
  if(/\b(sedan|ghost|taycan|s580e|s560|e43|m5)\b/.test(model))return 'Sedan';

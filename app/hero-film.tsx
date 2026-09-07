@@ -37,5 +37,5 @@ export default function HeroFilm(){
   if(element.readyState>=2)decoded();
   return()=>{finishIntro();document.removeEventListener('visibilitychange',visibility);media.removeEventListener('change',change);section.removeEventListener('hero-film-progress',update);element.removeEventListener('loadeddata',decoded);element.removeEventListener('seeked',decoded)};
  },[]);
- return <div className="hero-film"><img className="hero-film-poster" src="/images/aventador-gray-poster.jpg" alt="Gray Lamborghini Aventador S LP740-4 Roadster — cinematic visualization based on the actual dealer vehicle" fetchPriority="high"/><video ref={video} className={`hero-film-video ${visible&&!failed&&!reduced?'is-ready':''}`} src={reduced?undefined:'/videos/aventador-gray-hero.mp4'} muted playsInline preload="auto" aria-hidden="true" onError={()=>setFailed(true)}/></div>;
+ return <div className={`hero-film ${failed?'film-fallback':''}`}><img className="hero-film-poster" src="/images/aventador-gray-poster.jpg" alt="Gray Lamborghini Aventador S LP740-4 Roadster — cinematic visualization based on the actual dealer vehicle" fetchPriority="high"/><video ref={video} className={`hero-film-video ${visible&&!failed&&!reduced?'is-ready':''}`} src={reduced?undefined:'/videos/aventador-gray-hero.mp4'} muted playsInline preload="auto" aria-hidden="true" onError={()=>setFailed(true)}/></div>;
 }
