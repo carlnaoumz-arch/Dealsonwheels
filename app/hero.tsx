@@ -55,6 +55,6 @@ export default function Hero(){
     <div className="hero-narrative" aria-hidden="true">{story.map((line,i)=><div className={`story-mask story-${i}`} key={line}><p>{line}</p></div>)}</div>
     <p className="sr-only">{story.join(' ')}</p>
     <div className="hero-signature"><p className="eyebrow">WELCOME TO THE SPECIAL LEAGUE</p><h1>Deals On Wheels.</h1><div className="hero-actions"><a className="text-link" href="#collection">Explore collection <ArrowUpRight size={16}/></a></div></div>
-    <div className={`scroll-cue ${ready?'visible':''}`}><span>{reduced?'DISCOVER THE COLLECTION':'SCROLL TO DISCOVER'}</span><ArrowDown size={21}/></div><a className="skip visible" href="#collection">Skip to collection ↘</a><div className="model-note">Higgsfield visualization · Based on the actual vehicle</div><div className="hero-outro"/><div className="timeline"/>
+    <div className={`scroll-cue ${ready?'visible':''}`}><span>{reduced?'DISCOVER THE COLLECTION':'SCROLL TO DISCOVER'}</span><ArrowDown size={21}/></div><a className="skip visible" href="#collection">Skip to collection ↘</a><div className="hero-outro"/><div className="timeline"/>
   </div></section>;
 }
