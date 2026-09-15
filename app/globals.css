@@ -159,3 +159,7 @@ nav .nav-find-car{color:#cfbd9d}
 .cinematic-caption{position:absolute;bottom:26px;left:7%;font-size:12px;color:#b5ad9e;z-index:1}
 .appointment-fields>label{position:relative}.appointment-fields>label>span{position:absolute;right:0;top:0}.appointment-dialog .search-hint{margin-bottom:16px}.appointment-dialog .appointment-policy{margin-top:16px;margin-bottom:16px}
 @media(min-width:701px) and (max-width:900px){header nav{gap:18px;font-size:13px}header .wordmark{font-size:17px}}
+
+/* Keep a lightweight still visible while mobile video decodes or recovers. */
+.hero-film-poster{opacity:max(.18,var(--body,0));transition:opacity .15s linear}.hero-film.film-fallback .hero-film-video{opacity:0}.hero-film.film-fallback .hero-film-poster{opacity:1}
+@media(prefers-reduced-motion:reduce){.hero-film-poster{opacity:1}}

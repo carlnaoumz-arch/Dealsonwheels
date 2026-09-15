@@ -13,9 +13,10 @@ export default function Gallery({photos,exteriorPhotos,title,tourVideo}:{photos:
   const [retry,setRetry]=useState(0);
   useEffect(()=>{
     let active=true;const photo=new Image();setLoadState('loading');
-    photo.onload=()=>{void photo.decode().catch(()=>{}).then(()=>{if(active){setDisplayed(index);setLoadState('ready')}})};
-    photo.onerror=()=>{if(active)setLoadState('error')};photo.src=photos[index];
-    return()=>{active=false;photo.onload=null;photo.onerror=null};
+    const timeout=setTimeout(()=>{if(active)setLoadState('error')},12000);
+    photo.onload=()=>{void photo.decode().catch(()=>{}).then(()=>{if(active){clearTimeout(timeout);setDisplayed(index);setLoadState('ready')}})};
+    photo.onerror=()=>{clearTimeout(timeout);if(active)setLoadState('error')};if(photos[index])photo.src=photos[index];
+    return()=>{active=false;clearTimeout(timeout);photo.onload=null;photo.onerror=null};
   },[photos,index,retry]);
   if(!photos.length)return <p className="availability">Vehicle photography is available from our sales team.</p>;
   const move=(delta:number)=>setIndex(value=>wrapPhotoIndex(value+delta,photos.length));

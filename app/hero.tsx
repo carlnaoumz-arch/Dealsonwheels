@@ -11,7 +11,7 @@ export default function Hero(){
   useEffect(()=>{
     const media=matchMedia('(prefers-reduced-motion: reduce)');
     const el=ref.current!;
-    let frame=0,active=false,current=0,last=0;
+    let frame=0,active=false,current=0,last=0,lastFilm=-1,lastPaint='';
     const apply=(time:number)=>{
       frame=0;
       const target=clamp(-el.getBoundingClientRect().top/Math.max(1,el.offsetHeight-innerHeight));
@@ -19,13 +19,16 @@ export default function Hero(){
       last=time;
       current=media.matches?target:current+(target-current)*(1-Math.exp(-dt/85));
       if(Math.abs(target-current)<.0001)current=target;
+      const paint=`${current}:${active}:${media.matches}:${innerWidth<=700}`;
+      if(paint===lastPaint)return;lastPaint=paint;
       const m=heroMotion(current,media.matches);
       if(innerWidth<=700&&!media.matches)m.stories[0]=Math.max(m.stories[0],(active?1:0)*(1-clamp(current/.13)));
       const a=active||media.matches?1:0;
       const s=el.style;
       s.setProperty('--body',String(m.body*a));
       s.setProperty('--film-exposure',String(.28+.72*clamp(current/.14)));
-      el.dispatchEvent(new CustomEvent('hero-film-progress',{detail:clamp(current/.82)*a}));
+      const film=clamp(current/.82)*a;
+      if(Math.abs(film-lastFilm)>.001||film===0&&lastFilm!==0||film===1&&lastFilm!==1){lastFilm=film;el.dispatchEvent(new CustomEvent('hero-film-progress',{detail:film}))}
       s.setProperty('--beam',`${m.body*150}%`);
       s.setProperty('--headlights',String(m.headlights*a));
       s.setProperty('--sweep',`${m.sweep}%`);
