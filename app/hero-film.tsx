@@ -7,58 +7,64 @@ export default function HeroFilm(){
   const element=video.current!;
   const section=element.closest('section')!;
   const media=matchMedia('(prefers-reduced-motion: reduce)');
-  let disposed=false,target=0,introFloor=0,frame=0,introStarted=false,introRunning=false,inView=true;
-  let introDeadline=0,lastSeek=0,seekTimer:ReturnType<typeof setTimeout>|undefined,loadTimer:ReturnType<typeof setTimeout>|undefined;
+  let disposed=false,inView=true,blocked=false,failed=false,pending=false,frame=0,lastFrame=0;
+  let seekTimer:ReturnType<typeof setTimeout>|undefined,loadTimer:ReturnType<typeof setTimeout>|undefined;
+  const active=()=>!disposed&&!document.hidden&&inView&&!media.matches&&!failed;
   const revealPoster=()=>{if(!disposed)setFallback(true)};
-  const finishIntro=()=>{introRunning=false;element.pause();introFloor=Math.min(1.25,element.currentTime||0)};
-  const schedule=()=>{if(!frame&&!disposed&&!document.hidden&&inView&&!media.matches)frame=requestAnimationFrame(tick)};
+  const stop=()=>{cancelAnimationFrame(frame);frame=0;lastFrame=0;clearTimeout(seekTimer);element.pause()};
+  const schedule=()=>{if(!frame&&active()&&blocked)frame=requestAnimationFrame(tick)};
+  // If the browser refuses autoplay, advance the same footage without a play overlay.
+  // Only one frame decode can be outstanding; never queue up work on a slow phone.
   function tick(now:number){
    frame=0;
-   if(disposed||document.hidden||!inView||media.matches)return;
-   if(introRunning){
-    if(element.currentTime>=1.2||now>=introDeadline){finishIntro()}else{schedule();return}
-   }
-   if(element.readyState<2||element.seeking||!Number.isFinite(element.duration))return;
-   const time=introFloor+target*Math.max(0,element.duration-.05-introFloor);
-   if(Math.abs(element.currentTime-time)<=.045)return;
-   // Only one outstanding decode, at most 30 seeks/second. Seeked resumes at the latest scroll target.
-   if(now-lastSeek<33){schedule();return}
-   lastSeek=now;
-   clearTimeout(seekTimer);
-   seekTimer=setTimeout(revealPoster,1500);
-   try{element.currentTime=Math.max(0,time)}catch{revealPoster()}
+   if(!active()||!blocked)return;
+   if(element.readyState<2||element.seeking||!Number.isFinite(element.duration)||element.duration<=.05){lastFrame=0;return}
+   if(!lastFrame){lastFrame=now;schedule();return}
+   const elapsed=now-lastFrame;
+   if(elapsed<33){schedule();return}
+   lastFrame=now;
+   clearTimeout(seekTimer);seekTimer=setTimeout(revealPoster,1500);
+   try{element.currentTime=(element.currentTime+Math.min(elapsed,100)*.00055)%(element.duration-.02)}catch{revealPoster()}
   }
-  const startIntro=()=>{
-   if(introStarted||media.matches||document.hidden||!inView||target>.002)return;
-   introStarted=true;introRunning=true;introDeadline=performance.now()+3000;element.playbackRate=.55;
-   schedule();
-   void element.play().catch(()=>{if(!disposed){finishIntro();schedule()}});
+  const play=()=>{
+   if(!active()||pending)return;
+   if(blocked){schedule();return}
+   if(!element.paused)return;
+   pending=true;
+   void element.play().then(()=>{
+    pending=false;
+    if(!active())element.pause();
+   }).catch(()=>{
+    pending=false;
+    if(!active())return;
+    blocked=true;lastFrame=0;schedule();
+   });
   };
   const decoded=()=>{
-   if(disposed||element.readyState<2||element.seeking)return;
-   clearTimeout(loadTimer);clearTimeout(seekTimer);setVisible(true);setFallback(false);
-   startIntro();schedule();
+   if(disposed||media.matches||failed||element.readyState<2||element.seeking)return;
+   clearTimeout(loadTimer);clearTimeout(seekTimer);setVisible(true);setFallback(false);play();
   };
-  const update=(event:Event)=>{
-   target=Math.max(0,Math.min(1,(event as CustomEvent<number>).detail));
-   if(target>.002&&introRunning)finishIntro();schedule();
-  };
+  const retry=()=>{if(active()){blocked=false;cancelAnimationFrame(frame);frame=0;lastFrame=0;play()}};
   const change=()=>{
-   if(media.matches){finishIntro();cancelAnimationFrame(frame);frame=0;setVisible(false);setFallback(true);element.removeAttribute('src');element.load();return}
+   if(media.matches){stop();setVisible(false);setFallback(true);element.removeAttribute('src');element.load();return}
    if(!element.getAttribute('src')){
-    // Choose once; rotating a phone must not restart or download a second film.
+    // Set the actual DOM properties before the source: required for reliable iPhone autoplay.
+    element.muted=true;element.defaultMuted=true;element.playsInline=true;element.autoplay=true;element.loop=true;element.controls=false;element.playbackRate=.55;
     element.src=matchMedia('(max-width:700px)').matches?'/videos/aventador-gray-hero-mobile.mp4':'/videos/aventador-gray-hero.mp4';
-    loadTimer=setTimeout(revealPoster,5000);element.load();
+    failed=false;blocked=false;loadTimer=setTimeout(revealPoster,5000);element.load();
    }
-   decoded();schedule();
+   decoded();play();
   };
-  const visibility=()=>{if(document.hidden){if(introRunning)finishIntro();cancelAnimationFrame(frame);frame=0}else{decoded();schedule()}};
-  const observer=new IntersectionObserver(entries=>{inView=entries[0].isIntersecting;if(!inView){if(introRunning)finishIntro();cancelAnimationFrame(frame);frame=0}else{decoded();schedule()}},{rootMargin:'100px'});
+  const visibility=()=>{if(!active())stop();else{decoded();retry()}};
+  const error=()=>{failed=true;stop();revealPoster()};
+  const observer=new IntersectionObserver(entries=>{inView=entries[0].isIntersecting;visibility()},{rootMargin:'100px'});
   observer.observe(section);
-  element.addEventListener('loadeddata',decoded);element.addEventListener('canplay',decoded);element.addEventListener('seeked',decoded);element.addEventListener('error',revealPoster);
-  section.addEventListener('hero-film-progress',update);media.addEventListener('change',change);document.addEventListener('visibilitychange',visibility);window.addEventListener('pageshow',visibility);
+  element.addEventListener('loadeddata',decoded);element.addEventListener('canplay',decoded);element.addEventListener('seeked',decoded);element.addEventListener('error',error);
+  media.addEventListener('change',change);document.addEventListener('visibilitychange',visibility);window.addEventListener('pageshow',visibility);
+  // A normal touch is also a retry opportunity if the device restricts video playback.
+  window.addEventListener('pointerdown',retry,{passive:true});window.addEventListener('touchstart',retry,{passive:true});
   change();
-  return()=>{disposed=true;finishIntro();cancelAnimationFrame(frame);clearTimeout(loadTimer);clearTimeout(seekTimer);observer.disconnect();element.removeEventListener('loadeddata',decoded);element.removeEventListener('canplay',decoded);element.removeEventListener('seeked',decoded);element.removeEventListener('error',revealPoster);section.removeEventListener('hero-film-progress',update);media.removeEventListener('change',change);document.removeEventListener('visibilitychange',visibility);window.removeEventListener('pageshow',visibility)};
+  return()=>{disposed=true;stop();clearTimeout(loadTimer);observer.disconnect();element.removeEventListener('loadeddata',decoded);element.removeEventListener('canplay',decoded);element.removeEventListener('seeked',decoded);element.removeEventListener('error',error);media.removeEventListener('change',change);document.removeEventListener('visibilitychange',visibility);window.removeEventListener('pageshow',visibility);window.removeEventListener('pointerdown',retry);window.removeEventListener('touchstart',retry)};
  },[]);
- return <div className={`hero-film ${fallback?'film-fallback':''}`}><img className="hero-film-poster" src="/images/aventador-gray-poster.jpg" alt="Gray Lamborghini Aventador S LP740-4 Roadster — cinematic visualization based on the actual dealer vehicle" fetchPriority="high" width={1920} height={1080}/><video ref={video} className={`hero-film-video ${visible&&!fallback?'is-ready':''}`} muted playsInline preload="auto" aria-hidden="true"/></div>;
+ return <div className={`hero-film ${fallback?'film-fallback':''}`}><img className="hero-film-poster" src="/images/aventador-gray-poster.jpg" alt="Gray Lamborghini Aventador S LP740-4 Roadster — cinematic visualization based on the actual dealer vehicle" fetchPriority="high" width={1920} height={1080}/><video ref={video} className={`hero-film-video ${visible&&!fallback?'is-ready':''}`} autoPlay loop muted playsInline controls={false} disablePictureInPicture preload="auto" aria-hidden="true"/></div>;
 }

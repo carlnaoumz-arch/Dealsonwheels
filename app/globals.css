@@ -163,3 +163,5 @@ nav .nav-find-car{color:#cfbd9d}
 /* Keep a lightweight still visible while mobile video decodes or recovers. */
 .hero-film-poster{opacity:max(.18,var(--body,0));transition:opacity .15s linear}.hero-film.film-fallback .hero-film-video{opacity:0}.hero-film.film-fallback .hero-film-poster{opacity:1}
 @media(prefers-reduced-motion:reduce){.hero-film-poster{opacity:1}}
+/* Decorative hero film has no native playback overlay or touch controls. */
+.hero-film-video::-webkit-media-controls,.hero-film-video::-webkit-media-controls-start-playback-button{display:none!important}
