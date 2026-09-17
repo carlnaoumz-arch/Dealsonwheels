@@ -1,0 +1,6 @@
+{
+  "name": "deals-on-wheels-photo-tools",
+  "private": true,
+  "type": "module",
+  "dependencies": { "sharp": "0.35.4" }
+}

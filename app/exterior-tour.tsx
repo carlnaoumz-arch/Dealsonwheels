@@ -3,6 +3,8 @@ import {useEffect,useId,useRef,useState,type PointerEvent} from 'react';
 import {ArrowLeft,ArrowRight,LoaderCircle,MoveHorizontal,Pause,Play,RotateCw} from 'lucide-react';
 import {Slider} from '@/components/ui/slider';
 import {wrapPhotoIndex,tourBlend} from '@/lib/photo-tour';
+import {photoVariant} from '@/lib/responsive-photo';
+import {loadTourPhotos} from '@/lib/load-tour-photos';
 
 type Drag={id:number;x:number;position:number;width:number};
 export default function ExteriorTour({photos,title}:{photos:string[];title:string}){
@@ -28,21 +30,16 @@ export default function ExteriorTour({photos,title}:{photos:string[];title:strin
     update();media.addEventListener('change',update);return()=>media.removeEventListener('change',update);
   },[]);
   useEffect(()=>{
-    let active=true;
+    const controller=new AbortController();
     setLoading(true);setPlaying(false);setFailed(false);
-    // Load and decode the exterior sequence once, so scrubbing never waits on a request.
-    Promise.all(photos.map(source=>new Promise<string|null>(resolve=>{
-      const photo=new Image();let settled=false;
-      const finish=(value:string|null)=>{if(settled)return;settled=true;clearTimeout(timeout);photo.onload=null;photo.onerror=null;resolve(value)};
-      const timeout=setTimeout(()=>finish(null),25000);
-      photo.onload=()=>{photo.decode().then(()=>finish(source)).catch(()=>finish(null))};photo.onerror=()=>finish(null);photo.src=source;
-    }))).then(results=>{
-      if(!active)return;
-      const available=results.filter((source):source is string=>source!==null);
+    const sources=photos.map(source=>matchMedia('(max-width: 700px)').matches?photoVariant(source,800):source);
+    // On-load is authoritative; Safari decode() failures must not discard visible photos.
+    loadTourPhotos(sources,controller.signal).then(available=>{
+      if(controller.signal.aborted)return;
       current.current=0;target.current=0;setPosition(0);
       setReady(available);setFailed(available.length!==photos.length);setLoading(false);
     });
-    return()=>{active=false};
+    return()=>controller.abort();
   },[photos,retry]);
   function tick(time:number){
     frame.current=0;
